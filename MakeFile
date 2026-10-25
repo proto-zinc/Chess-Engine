@@ -1,0 +1,19 @@
+CXX = g++
+CXXFLAGS = -std=c++20 -O3 -Wall -Wextra -march=native
+
+SRC = $(wildcard src/*.cpp)
+OBJ = $(SRC:.cpp=.o)
+TARGET = chess_engine
+
+all: $(TARGET)
+
+$(TARGET): $(OBJ)
+	$(CXX) $(CXXFLAGS) -o $@ $^
+
+src/%.o: src/%.cpp
+	$(CXX) $(CXXFLAGS) -c $< -o $@
+
+clean:
+	rm -f src/*.o $(TARGET)
+
+.PHONY: all clean
