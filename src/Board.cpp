@@ -1,49 +1,8 @@
 #include "Board.hpp"
 #include <iostream>
 
-void Board::setupStartingPosition(){
-
-  for (int i = 0; i < 64; i++) {
-    if(i >= A2 && i <= H2){
-      board[i] = PAWN ;
-    }
-    else if(i >= A7 && i <= H7){
-      board[i] = -PAWN ;
-    }
-    else if(i == A1 || i == H1){
-      board[i] = ROOK ;
-    }
-    else if(i == B1 || i == G1){
-      board[i] = KNIGHT;
-    }
-    else if(i == C1 || i == F1){
-      board[i] = BISHOP ;
-    }
-    else if(i == D1){
-      board[i] = QUEEN ;
-    }
-    else if(i == E1){
-      board[i] = KING ;
-    }
-    else if(i == A8 || i == H8){
-      board[i] = -(ROOK) ;
-    }
-    else if(i == B8 || i == G8){
-      board[i] = -(KNIGHT) ;
-    }
-    else if(i == C8 || i == F8){
-      board[i] = -(BISHOP) ;
-    }
-    else if(i == D8){
-      board[i] = -(QUEEN) ;
-    }
-    else if(i == E8){
-      board[i] = -(KING) ;
-    }
-    else{
-      board[i] = NONE;
-    }
-  }
+void Board::setupStartingPosition(const std::string& fen){
+  loadPositionFromFEN(fen);
 }
 
 void Board::printBoard(){
@@ -51,7 +10,7 @@ void Board::printBoard(){
   for (int rank = 7; rank >= 0; rank--) {
     std::cout << rank + 1 << "  ";
     for (int file = 0; file < 8; file++) {
-      int index = squareIndex(file, rank);
+      int index = squareIndex(rank, file);
       int piece = board[index];
       char pieceChar;
 
@@ -68,7 +27,7 @@ void Board::printBoard(){
         case -ROOK: pieceChar = 'r'; break;
         case -QUEEN: pieceChar = 'q'; break;
         case -KING: pieceChar = 'k'; break;
-        default: pieceChar = '.'; 
+        default: pieceChar = '-'; 
       }
       std::cout << pieceChar << " ";
     }
@@ -77,6 +36,40 @@ void Board::printBoard(){
   std::cout << "\n   a b c d e f g h\n";
 }
 
-int Board::squareIndex(int file, int rank){
-  return (rank * 8) + file;
+int Board::squareIndex(int rank, int file){
+  return ((7 - rank) * 8) + file;
+}
+
+void Board::loadPositionFromFEN(const std::string& fen){
+  // Clear the internal board
+  for (int i = 0; i < 64; i++) {
+    board[i] = 0 ;
+  }
+  int square = 0 ;
+  for(char c: fen){
+
+    if(c == ' ') break ;
+
+    else if(c == '/') continue ;
+
+    else if(c >= '1' && c <= '8'){
+      square += (c - '0') ;
+    }
+
+    else{
+      if(c == 'p') board[square] = - PAWN ;
+      else if(c == 'P') board[square] = PAWN ;
+      else if(c == 'n') board[square] = - KNIGHT ;
+      else if(c == 'N') board[square] = KNIGHT ;
+      else if(c == 'b') board[square] = - BISHOP ;
+      else if(c == 'B') board[square] = BISHOP ;
+      else if(c == 'r') board[square] = - ROOK ;
+      else if(c == 'R') board[square] = ROOK ;
+      else if(c == 'q') board[square] = - QUEEN ;
+      else if(c == 'Q') board[square] = QUEEN ;
+      else if(c == 'k') board[square] = - KING ;
+      else if(c == 'K') board[square] = KING ;
+      square++ ;
+    }
+  }
 }
