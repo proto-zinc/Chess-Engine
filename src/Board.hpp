@@ -6,8 +6,11 @@
 class Board {
 private:
     int board[64];
+    int sideToMove;
+    int castlingRights;
+    int enPassantSquare; // none -> -1
 public:
-    void setupStartingPosition(const std::string& fen);
+    void setupStartingPosition();
     void printBoard();
     int squareIndex(int rank, int file);
     void loadPositionFromFEN(const std::string& fen);

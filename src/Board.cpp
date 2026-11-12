@@ -1,8 +1,9 @@
 #include "Board.hpp"
 #include <iostream>
+#include <sstream>
 
-void Board::setupStartingPosition(const std::string& fen){
-  loadPositionFromFEN(fen);
+void Board::setupStartingPosition(){
+  loadPositionFromFEN("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1");
 }
 
 void Board::printBoard(){
@@ -33,7 +34,10 @@ void Board::printBoard(){
     }
     std::cout << "\n";
   }
-  std::cout << "\n   a b c d e f g h\n";
+  std::cout << "   a b c d e f g h\n\n";
+  std::cout << "Side to move: " << (sideToMove == WHITE ? "White" : "Black") << "\n";
+  std::cout << "Castling rights: " << castlingRights << "\n";
+  std::cout << "En passant square: " << enPassantSquare << "\n";
 }
 
 int Board::squareIndex(int rank, int file){
@@ -45,12 +49,18 @@ void Board::loadPositionFromFEN(const std::string& fen){
   for (int i = 0; i < 64; i++) {
     board[i] = 0 ;
   }
+  // Loading position from FEN
+  std::stringstream ss(fen);
+  std::string piecePlacement, activeColor, castling, enPassant;
+  int halfmoveClock = 0;
+  int fullmoveNumber = 1;
+  ss >> piecePlacement >> activeColor >> castling >> enPassant >> halfmoveClock >> fullmoveNumber;
+
   int square = 0 ;
-  for(char c: fen){
+  // Placing the pieces
+  for(char c: piecePlacement){
 
-    if(c == ' ') break ;
-
-    else if(c == '/') continue ;
+    if(c == '/') continue ;
 
     else if(c >= '1' && c <= '8'){
       square += (c - '0') ;
@@ -71,5 +81,25 @@ void Board::loadPositionFromFEN(const std::string& fen){
       else if(c == 'K') board[square] = KING ;
       square++ ;
     }
+  }
+
+  // Defining the side which will make the move
+  sideToMove = (activeColor == "w")? WHITE : BLACK ;
+
+  // Castling rights
+  castlingRights = 0 ;
+  for(char c : castling){
+    if(c == 'K') castlingRights |= 1 ;
+    else if(c == 'Q') castlingRights |= 2 ;
+    else if(c == 'k') castlingRights |= 4 ;
+    else if(c == 'q') castlingRights |= 8 ;
+  }
+
+  // En passant square
+  if(enPassant == "-") enPassantSquare = -1 ;
+  else{
+    int file = enPassant[0] - 'a' ;
+    int rank = enPassant[1] - '1' ;
+    enPassantSquare = squareIndex(rank, file) ;
   }
 }

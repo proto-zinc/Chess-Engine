@@ -17,6 +17,14 @@ enum pieces{
   NONE = 0
 };
 
+enum CastlingRights {
+    NO_CASTLING = 0,
+    WHITE_OO    = 1, // White Kingside
+    WHITE_OOO   = 2, // White Queenside
+    BLACK_OO    = 4, // Black Kingside
+    BLACK_OOO   = 8 // Black Queenside
+};
+
 enum squares{
    A8 , B8 , C8 , D8 , E8 , F8 , G8 , H8 ,
    A7 , B7 , C7 , D7 , E7 , F7 , G7 , H7 ,
