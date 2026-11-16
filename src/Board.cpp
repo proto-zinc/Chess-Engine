@@ -1,4 +1,5 @@
 #include "Board.hpp"
+#include "Move.hpp"
 #include <iostream>
 #include <sstream>
 
@@ -102,4 +103,13 @@ void Board::loadPositionFromFEN(const std::string& fen){
     int rank = enPassant[1] - '1' ;
     enPassantSquare = squareIndex(rank, file) ;
   }
+}
+
+// Getter Functions
+int Board::getPieceAt(int sq) const{
+  return board[sq] ;
+}
+
+int Board::getSideToMove() const{
+  return sideToMove ; 
 }

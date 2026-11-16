@@ -14,4 +14,6 @@ public:
     void printBoard();
     int squareIndex(int rank, int file);
     void loadPositionFromFEN(const std::string& fen);
+    int getPieceAt(int sq) const;
+    int getSideToMove() const;
 };
