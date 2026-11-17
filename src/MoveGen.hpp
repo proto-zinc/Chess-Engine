@@ -8,8 +8,12 @@ class MoveGen
   private:
     static constexpr int directionOffsets[8] = { -8, 8, -1, 1, -9, -7, 7, 9 };
     int numSquaresToEdge[64][8];
+    std::vector<int> knightMoves[64];
+    std::vector<int> kingMoves[64];
     void precomputeMoveData();
     void generateSlidingMoves(int startSquare, int piece, const Board& board, std::vector<Move>& moves) const;
+    void generateKnightMoves(int startSquare, int piece, const Board& board, std::vector<Move>& moves) const;
+    void generateKingMoves(int startSquare, int piece, const Board& board, std::vector<Move>& moves) const;
   public:
     MoveGen(){
       precomputeMoveData();

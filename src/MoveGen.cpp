@@ -1,11 +1,21 @@
 #include "Move.hpp"
 #include "MoveGen.hpp"
 #include <cmath>
+#include <algorithm>
 
 void MoveGen::precomputeMoveData(){
+
+  // For non - sliding pieces
+  const int knightRowDeltas[8] = { -2, -2, -1, -1,  1,  1,  2,  2 };
+  const int knightColDeltas[8] = { -1,  1, -2,  2, -2,  2, -1,  1 };
+
+  const int kingRowDeltas[8] = { -1, -1, -1,  0,  0,  1,  1,  1 };
+  const int kingColDeltas[8] = { -1,  0,  1, -1,  1, -1,  0,  1 };
+
   for (int sq = 0; sq < 64; sq++) {
     int row = sq / 8 ;
     int col = sq % 8 ;
+    // For sliding pieces
     int north = row ;
     int south = 7 - row ;
     int west = col ;
@@ -22,6 +32,25 @@ void MoveGen::precomputeMoveData(){
     numSquaresToEdge[sq][5] = north_east ;
     numSquaresToEdge[sq][6] = south_west ;
     numSquaresToEdge[sq][7] = south_east ;
+
+    // For non - sliding pieces
+    for (int i = 0; i < 8; i++) {
+      // Knight 
+      int targetRow = row + knightRowDeltas[i];
+      int targetCol = col + knightColDeltas[i];
+      if((targetRow >= 0 && targetRow < 8) && (targetCol >= 0 && targetCol < 8)){
+        int targetsq = (targetRow * 8) + targetCol ;
+        knightMoves[sq].emplace_back(targetsq) ;
+      }
+
+      // King
+      targetRow = row + kingRowDeltas[i];
+      targetCol = col + kingColDeltas[i];
+      if((targetRow >= 0 && targetRow < 8) && (targetCol >= 0 && targetCol < 8)){
+        int targetsq = (targetRow * 8) + targetCol ;
+        kingMoves[sq].emplace_back(targetsq) ;
+      }
+    }
   }
 }
 
@@ -32,9 +61,19 @@ std::vector<Move> MoveGen::generateMoves(const Board& board) const{
     int piece = board.getPieceAt(startSquare);
     if(piece == NONE || (sideToMove == WHITE && piece < 0) || (sideToMove == BLACK && piece > 0)) continue;
     int pieceType = std::abs(piece);
+    // Sliding Pieces
     if(pieceType == ROOK || pieceType == QUEEN || pieceType == BISHOP){
       generateSlidingMoves(startSquare, piece, board, moves);
     }
+    // Non - Sliding Pieces
+    else if(pieceType == KING){
+      generateKingMoves(startSquare, piece, board , moves) ;
+    }
+
+    else if(pieceType == KNIGHT){
+      generateKnightMoves(startSquare, piece, board , moves) ;
+    }
+
   }
   return moves ;
 }
@@ -66,4 +105,24 @@ void MoveGen::generateSlidingMoves(int startSquare, int piece, const Board& boar
 
     }
   }
+}
+
+void MoveGen::generateKnightMoves(int startSquare, int piece, const Board& board, std::vector<Move>& moves) const{
+  for (int targetSq : knightMoves[startSquare]) {
+      int pieceOnTarget = board.getPieceAt(targetSq);
+      // Enemy Piece or, Target Piece is empty. Insert piece but don't break because knight can still move
+      if(piece * pieceOnTarget <= 0){
+        moves.push_back({startSquare, targetSq});
+      }
+  } 
+}
+
+void MoveGen::generateKingMoves(int startSquare, int piece, const Board& board, std::vector<Move>& moves) const{
+  for (int targetSq : kingMoves[startSquare]) {
+      int pieceOnTarget = board.getPieceAt(targetSq);
+      // Enemy Piece or, Target Piece is empty. Insert piece but don't break because king can still move
+      if(piece * pieceOnTarget <= 0){
+        moves.push_back({startSquare, targetSq});
+      }
+  } 
 }
