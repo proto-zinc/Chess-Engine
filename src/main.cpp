@@ -6,7 +6,7 @@
 
 int main(){
   Board chessBoard;
-  const std::string startingFEN = "4kb1r/p2rqppp/5n2/1B2p1B1/4P3/1Q6/PPP2PPP/2KR4 b k - 0 14";
+  const std::string startingFEN = "8/P7/8/8/8/8/8/k6K w - - 0 1";
   chessBoard.loadPositionFromFEN(startingFEN);
   chessBoard.printBoard();
 

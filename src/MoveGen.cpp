@@ -16,41 +16,41 @@ void MoveGen::precomputeMoveData(){
     int row = sq / 8 ;
     int col = sq % 8 ;
     // For sliding pieces
-    int north = row ;
-    int south = 7 - row ;
-    int west = col ;
-    int east = 7 - col ;
-    int north_west = std::min(north , west) ;
-    int north_east = std::min(north , east) ;
-    int south_west = std::min(south , west) ;
-    int south_east = std::min(south , east) ;
-    numSquaresToEdge[sq][0] = north ;
-    numSquaresToEdge[sq][1] = south ;
-    numSquaresToEdge[sq][2] = west ;
-    numSquaresToEdge[sq][3] = east ;
-    numSquaresToEdge[sq][4] = north_west ;
-    numSquaresToEdge[sq][5] = north_east ;
-    numSquaresToEdge[sq][6] = south_west ;
-    numSquaresToEdge[sq][7] = south_east ;
+      int north = row ;
+      int south = 7 - row ;
+      int west = col ;
+      int east = 7 - col ;
+      int north_west = std::min(north , west) ;
+      int north_east = std::min(north , east) ;
+      int south_west = std::min(south , west) ;
+      int south_east = std::min(south , east) ;
+      numSquaresToEdge[sq][0] = north ;
+      numSquaresToEdge[sq][1] = south ;
+      numSquaresToEdge[sq][2] = west ;
+      numSquaresToEdge[sq][3] = east ;
+      numSquaresToEdge[sq][4] = north_west ;
+      numSquaresToEdge[sq][5] = north_east ;
+      numSquaresToEdge[sq][6] = south_west ;
+      numSquaresToEdge[sq][7] = south_east ;
 
     // For non - sliding pieces
-    for (int i = 0; i < 8; i++) {
-      // Knight 
-      int targetRow = row + knightRowDeltas[i];
-      int targetCol = col + knightColDeltas[i];
-      if((targetRow >= 0 && targetRow < 8) && (targetCol >= 0 && targetCol < 8)){
-        int targetsq = (targetRow * 8) + targetCol ;
-        knightMoves[sq].emplace_back(targetsq) ;
-      }
+      for (int i = 0; i < 8; i++) {
+        // Knight 
+        int targetRow = row + knightRowDeltas[i];
+        int targetCol = col + knightColDeltas[i];
+        if((targetRow >= 0 && targetRow < 8) && (targetCol >= 0 && targetCol < 8)){
+          int targetsq = (targetRow * 8) + targetCol ;
+          knightMoves[sq].emplace_back(targetsq) ;
+        }
 
-      // King
-      targetRow = row + kingRowDeltas[i];
-      targetCol = col + kingColDeltas[i];
-      if((targetRow >= 0 && targetRow < 8) && (targetCol >= 0 && targetCol < 8)){
-        int targetsq = (targetRow * 8) + targetCol ;
-        kingMoves[sq].emplace_back(targetsq) ;
+        // King
+        targetRow = row + kingRowDeltas[i];
+        targetCol = col + kingColDeltas[i];
+        if((targetRow >= 0 && targetRow < 8) && (targetCol >= 0 && targetCol < 8)){
+          int targetsq = (targetRow * 8) + targetCol ;
+          kingMoves[sq].emplace_back(targetsq) ;
+        }
       }
-    }
   }
 }
 
@@ -72,6 +72,9 @@ std::vector<Move> MoveGen::generateMoves(const Board& board) const{
 
     else if(pieceType == KNIGHT){
       generateKnightMoves(startSquare, piece, board , moves) ;
+    }
+    else if(pieceType == PAWN){
+      generatePawnMoves(startSquare, piece, board , moves) ;
     }
 
   }
@@ -125,4 +128,50 @@ void MoveGen::generateKingMoves(int startSquare, int piece, const Board& board, 
         moves.push_back({startSquare, targetSq});
       }
   } 
+}
+
+void MoveGen::addPawnMove(int from, int to, int promotionRow, std::vector<Move>& moves) const{
+  if (to / 8 == promotionRow) {
+      moves.push_back({from, to, PROMOTE_TO_QUEEN});
+      moves.push_back({from, to, PROMOTE_TO_ROOK});
+      moves.push_back({from, to, PROMOTE_TO_BISHOP});
+      moves.push_back({from, to, PROMOTE_TO_KNIGHT});
+    }
+    else {
+      moves.push_back({from, to, NO_FLAG});
+    }
+}
+
+void MoveGen::generatePawnMoves(int startSquare, int piece, const Board& board, std::vector<Move>& moves) const{
+  
+  int row = startSquare / 8 ;
+  int col = startSquare % 8 ;
+  int forwardOffset = (piece > 0) ? -8 : 8 ;
+  int startRow      = (piece > 0) ? 6 : 1 ;
+  int promotionRow  = (piece > 0) ? 0 : 7 ;
+  int oneStep = startSquare + forwardOffset;
+
+  if(board.getPieceAt(oneStep) == NONE){
+    addPawnMove(startSquare , oneStep , promotionRow , moves) ;
+    if(row == startRow){
+      int twoSteps = startSquare + forwardOffset * 2;
+      if(board.getPieceAt(twoSteps) == NONE){
+        moves.push_back({startSquare, twoSteps, NO_FLAG}) ;
+      }
+    }
+  }
+
+  for(int dCol = -1 ; dCol <= 1 ; dCol++){
+    int targetCol = col + dCol;
+    if(targetCol >= 0 && targetCol < 8){
+      int targetSq = startSquare + forwardOffset + dCol;
+      int pieceOnTarget = board.getPieceAt(targetSq);
+      if(piece * pieceOnTarget < 0){
+        addPawnMove(startSquare , targetSq , promotionRow , moves) ;
+      }
+      else if(targetSq == board.getEnPassantSquare()){
+        moves.push_back({startSquare , targetSq , EN_PASSANT}) ;
+      }
+    }
+  }
 }

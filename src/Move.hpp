@@ -1,9 +1,11 @@
 #pragma once
 #include <string>
+#include "Types.hpp"
 
 struct Move { 
   int from; 
   int to; 
+  int flag = NO_FLAG;
 };
 
 inline std::string squareToAlgebraic(int sq){
@@ -18,5 +20,17 @@ inline std::string squareToAlgebraic(int sq){
 
 inline std::string moveToString(Move m){
   std :: string s = squareToAlgebraic(m.from) + squareToAlgebraic(m.to);
+  if(m.flag == PROMOTE_TO_QUEEN){
+    s += 'q' ;
+  }
+  else if(m.flag == PROMOTE_TO_ROOK){
+    s += 'r' ;
+  }
+  else if(m.flag == PROMOTE_TO_BISHOP){
+    s += 'b' ;
+  }
+  else if(m.flag == PROMOTE_TO_KNIGHT){
+    s += 'n' ;
+  }
   return s ; 
 }

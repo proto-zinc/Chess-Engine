@@ -16,4 +16,5 @@ public:
     void loadPositionFromFEN(const std::string& fen);
     int getPieceAt(int sq) const;
     int getSideToMove() const;
+    int getEnPassantSquare() const;
 };

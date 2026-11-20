@@ -14,6 +14,8 @@ class MoveGen
     void generateSlidingMoves(int startSquare, int piece, const Board& board, std::vector<Move>& moves) const;
     void generateKnightMoves(int startSquare, int piece, const Board& board, std::vector<Move>& moves) const;
     void generateKingMoves(int startSquare, int piece, const Board& board, std::vector<Move>& moves) const;
+    void generatePawnMoves(int startSquare, int piece, const Board& board, std::vector<Move>& moves) const;
+    void addPawnMove(int from, int to, int promotionRow, std::vector<Move>& moves) const ;
   public:
     MoveGen(){
       precomputeMoveData();

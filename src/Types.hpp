@@ -35,3 +35,13 @@ enum squares{
    A2 , B2 , C2 , D2 , E2 , F2 , G2 , H2 ,
    A1 , B1 , C1 , D1 , E1 , F1 , G1 , H1 , 
 };
+
+enum MoveFlag {
+    NO_FLAG = 0,
+    EN_PASSANT,
+    CASTLING,
+    PROMOTE_TO_QUEEN,
+    PROMOTE_TO_ROOK,
+    PROMOTE_TO_BISHOP,
+    PROMOTE_TO_KNIGHT
+};

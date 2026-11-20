@@ -113,3 +113,7 @@ int Board::getPieceAt(int sq) const{
 int Board::getSideToMove() const{
   return sideToMove ; 
 }
+
+int Board::getEnPassantSquare() const{
+  return enPassantSquare ;
+}
