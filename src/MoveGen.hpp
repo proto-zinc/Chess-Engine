@@ -21,6 +21,8 @@ class MoveGen
       precomputeMoveData();
     }
     std::vector<Move> generateMoves(const Board& board) const;
+    bool isSquareAttacked(int sq, int attackerColor, const Board& board) const;
+    bool isKingInCheck(int kingColor, const Board& board) const;
 };
 
 /*constexpr (Constant Expression): Tells the compiler these 8 numbers are fixed at compile time and cannot be modified while the program runs.

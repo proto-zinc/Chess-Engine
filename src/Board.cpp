@@ -117,3 +117,7 @@ int Board::getSideToMove() const{
 int Board::getEnPassantSquare() const{
   return enPassantSquare ;
 }
+
+int Board::getCastlingRights() const{
+  return castlingRights ;
+}

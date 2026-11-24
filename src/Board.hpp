@@ -17,4 +17,5 @@ public:
     int getPieceAt(int sq) const;
     int getSideToMove() const;
     int getEnPassantSquare() const;
+    int getCastlingRights() const;
 };

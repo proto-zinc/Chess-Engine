@@ -6,7 +6,7 @@
 
 int main(){
   Board chessBoard;
-  const std::string startingFEN = "8/P7/8/8/8/8/8/k6K w - - 0 1";
+  const std::string startingFEN = "r3k2r/8/8/8/5b2/8/8/R3K2R w KQkq - 0 1";
   chessBoard.loadPositionFromFEN(startingFEN);
   chessBoard.printBoard();
 
@@ -17,6 +17,9 @@ int main(){
       std::cout << moveToString(m) << " ";
   }
   std::cout << "\n";
+  std::cout << moveGen.isKingInCheck(BLACK, chessBoard) << "\n" ;
+  std::cout << moveGen.isKingInCheck(WHITE, chessBoard) << "\n" ;
+  std::cout << moveGen.isSquareAttacked(45, WHITE, chessBoard) << "\n" ; // D7
 
   return 0 ;
 }

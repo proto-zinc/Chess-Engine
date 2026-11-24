@@ -128,6 +128,53 @@ void MoveGen::generateKingMoves(int startSquare, int piece, const Board& board, 
         moves.push_back({startSquare, targetSq});
       }
   } 
+  // Castling Moves
+  int castlingRights = board.getCastlingRights();
+  if (piece > 0 && startSquare == 60) { // White King on e1
+      // King cannot castle out of check
+      if (!isSquareAttacked(60, BLACK, board)) {
+          // White Kingside (K -> bit 1)
+          if ((castlingRights & 1) &&
+              board.getPieceAt(61) == NONE &&
+              board.getPieceAt(62) == NONE &&
+              !isSquareAttacked(61, BLACK, board) &&
+              !isSquareAttacked(62, BLACK, board)) {
+              moves.push_back({60, 62, CASTLING});
+          }
+
+          // White Queenside (Q -> bit 2)
+          if ((castlingRights & 2) &&
+              board.getPieceAt(59) == NONE &&
+              board.getPieceAt(58) == NONE &&
+              board.getPieceAt(57) == NONE &&
+              !isSquareAttacked(59, BLACK, board) &&
+              !isSquareAttacked(58, BLACK, board)) {
+              moves.push_back({60, 58, CASTLING});
+          }
+      }
+  }
+  else if (piece < 0 && startSquare == 4) { // Black King on e8
+          
+          // Black Kingside (k -> bit 4)
+          if ((castlingRights & 4) &&
+              board.getPieceAt(5) == NONE &&
+              board.getPieceAt(6) == NONE &&
+              !isSquareAttacked(5, WHITE, board) &&
+              !isSquareAttacked(6, WHITE, board)) {
+              moves.push_back({4, 6, CASTLING});
+          }
+
+          // Black Queenside (q -> bit 8)
+          if ((castlingRights & 8) &&
+              board.getPieceAt(3) == NONE &&
+              board.getPieceAt(2) == NONE &&
+              board.getPieceAt(1) == NONE &&
+              !isSquareAttacked(3, WHITE, board) &&
+              !isSquareAttacked(2, WHITE, board)) {
+              moves.push_back({4, 2, CASTLING});
+          }
+  }
+
 }
 
 void MoveGen::addPawnMove(int from, int to, int promotionRow, std::vector<Move>& moves) const{
@@ -161,7 +208,7 @@ void MoveGen::generatePawnMoves(int startSquare, int piece, const Board& board, 
     }
   }
 
-  for(int dCol = -1 ; dCol <= 1 ; dCol++){
+  for(int dCol : {-1 , 1}){
     int targetCol = col + dCol;
     if(targetCol >= 0 && targetCol < 8){
       int targetSq = startSquare + forwardOffset + dCol;
@@ -174,4 +221,64 @@ void MoveGen::generatePawnMoves(int startSquare, int piece, const Board& board, 
       }
     }
   }
+}
+
+bool MoveGen::isSquareAttacked(int sq, int attackerColor, const Board& board) const{
+  int row = sq / 8;
+  int col = sq % 8;
+  // Check for pawn attacks
+  if(attackerColor == WHITE){
+    if(row < 7){
+      if(col < 7 && board.getPieceAt(sq + 9) == PAWN) return true;
+      if(col > 0 && board.getPieceAt(sq + 7) == PAWN) return true;
+    }
+  }
+  else{
+    if(row > 0){
+      if(col < 7 && board.getPieceAt(sq - 7) == -PAWN) return true;
+      if(col > 0 && board.getPieceAt(sq - 9) == -PAWN) return true;
+    }
+  }
+
+  // Check for knight attacks
+  int enemyKnight = (attackerColor == WHITE) ? KNIGHT : -KNIGHT;
+  for(int targetSq : knightMoves[sq]){
+    if(board.getPieceAt(targetSq) == enemyKnight) return true;
+  }
+
+  // Check for king attacks
+  int enemyKing   = (attackerColor == WHITE) ? KING   : -KING;
+  for(int targetSq : kingMoves[sq]){
+    if(board.getPieceAt(targetSq) == enemyKing) return true;
+  }
+  
+  // Check for sliding piece attacks
+  for(int dirIndex = 0; dirIndex < 8; dirIndex++){
+    for(int step = 1; step <= numSquaresToEdge[sq][dirIndex]; step++){
+      int targetSq = sq + directionOffsets[dirIndex] * step;
+      int pieceOnTarget = board.getPieceAt(targetSq);
+      if(pieceOnTarget != NONE){
+        int type = std::abs(pieceOnTarget);
+        if((dirIndex < 4 && (type == ROOK || type == QUEEN)) || (dirIndex >= 4 && (type == BISHOP || type == QUEEN))){
+          if((attackerColor == WHITE && pieceOnTarget > 0) || (attackerColor == BLACK && pieceOnTarget < 0)){
+            return true;
+          }
+        }
+        break; // Stop searching in this direction
+      }
+    }
+  }
+  
+  return false; // No attacks found
+}
+
+bool MoveGen::isKingInCheck(int kingColor, const Board& board) const{
+  int targetKing = (kingColor == WHITE) ? KING : -KING;
+  for(int sq = 0; sq < 64; sq++){
+    if(board.getPieceAt(sq) == targetKing){
+      int opponentColor = (kingColor == WHITE) ? BLACK : WHITE;
+      return isSquareAttacked(sq, opponentColor, board);
+    }
+  }
+  return false;
 }
