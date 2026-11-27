@@ -16,13 +16,14 @@ class MoveGen
     void generateKingMoves(int startSquare, int piece, const Board& board, std::vector<Move>& moves) const;
     void generatePawnMoves(int startSquare, int piece, const Board& board, std::vector<Move>& moves) const;
     void addPawnMove(int from, int to, int promotionRow, std::vector<Move>& moves) const ;
-  public:
+    public:
     MoveGen(){
       precomputeMoveData();
     }
     std::vector<Move> generateMoves(const Board& board) const;
     bool isSquareAttacked(int sq, int attackerColor, const Board& board) const;
     bool isKingInCheck(int kingColor, const Board& board) const;
+    std::vector<Move> generateLegalMoves(Board& board) const ;
 };
 
 /*constexpr (Constant Expression): Tells the compiler these 8 numbers are fixed at compile time and cannot be modified while the program runs.

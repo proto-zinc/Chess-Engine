@@ -1,9 +1,9 @@
 #include "Board.hpp"
-#include "Move.hpp"
 #include <iostream>
 #include <sstream>
 
 void Board::setupStartingPosition(){
+  history.clear();
   loadPositionFromFEN("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1");
 }
 
@@ -46,6 +46,7 @@ int Board::squareIndex(int rank, int file){
 }
 
 void Board::loadPositionFromFEN(const std::string& fen){
+  history.clear();
   // Clear the internal board
   for (int i = 0; i < 64; i++) {
     board[i] = 0 ;
@@ -102,6 +103,111 @@ void Board::loadPositionFromFEN(const std::string& fen){
     int file = enPassant[0] - 'a' ;
     int rank = enPassant[1] - '1' ;
     enPassantSquare = squareIndex(rank, file) ;
+  }
+}
+
+void Board::makeMove(Move move){
+  // Save state before doing anything
+  history.push_back({ board[move.to], castlingRights, enPassantSquare });
+  // Capture moving pieces and reset en-passant
+  int piece = board[move.from];
+  int pieceType = std::abs(piece);
+  enPassantSquare = -1;
+  // en - passant
+  if(move.flag == EN_PASSANT){
+    if(piece > 0){
+      board[move.to + 8] = NONE ; //white captures
+    }
+    else{
+      board[move.to - 8] = NONE ; //black captures
+    }
+  }
+  // castling
+  else if(move.flag == CASTLING){
+    if(move.to == 62){ // white king side
+      board[63] = NONE ;
+      board[61] = ROOK ;
+    }
+    else if(move.to == 58){ // white queen side
+      board[56] = NONE ;
+      board[59] = ROOK ;
+    }
+    else if(move.to == 6){ // black king side
+      board[7] = NONE ;
+      board[5] = -ROOK ;
+    }
+    else if(move.to == 2){ // black queen side
+      board[0] = NONE ;
+      board[3] = -ROOK ;
+    }
+  }
+
+  board[move.from] = NONE;
+  int sign = (piece > 0) ? 1 : -1;
+
+  if (move.flag == PROMOTE_TO_QUEEN)       board[move.to] = sign * QUEEN;
+  else if (move.flag == PROMOTE_TO_ROOK)   board[move.to] = sign * ROOK;
+  else if (move.flag == PROMOTE_TO_BISHOP) board[move.to] = sign * BISHOP;
+  else if (move.flag == PROMOTE_TO_KNIGHT) board[move.to] = sign * KNIGHT;
+  else                                     board[move.to] = piece;
+
+  // Update castling rights
+  castlingRights &= castlingRightsMask[move.from];
+  castlingRights &= castlingRightsMask[move.to];
+
+  // Update en passant square
+  if(pieceType == PAWN && std::abs(move.to - move.from) == 16){
+    enPassantSquare = (move.from + move.to) / 2;
+  }
+
+  // Switch side to move
+  sideToMove = (sideToMove == WHITE) ? BLACK : WHITE;
+
+}
+
+ void Board::unmakeMove(Move move){
+  sideToMove = (sideToMove == WHITE) ? BLACK : WHITE;
+
+  UndoState state = history.back();
+  history.pop_back();
+  castlingRights = state.castlingRights;
+  enPassantSquare = state.enPassantSquare;
+
+  int movingPiece;
+  if(move.flag == PROMOTE_TO_QUEEN || move.flag == PROMOTE_TO_ROOK || move.flag == PROMOTE_TO_BISHOP || move.flag == PROMOTE_TO_KNIGHT){
+    movingPiece = (sideToMove == WHITE) ? PAWN : -PAWN;
+  }
+  else{
+    movingPiece = board[move.to];
+  }
+  board[move.from] = movingPiece;
+  board[move.to] = state.capturedPiece;
+
+  if(move.flag == EN_PASSANT){
+    if(sideToMove == WHITE){
+      board[move.to + 8] = -PAWN; // Restore captured black pawn
+    }
+    else{
+      board[move.to - 8] = PAWN; // Restore captured white pawn
+    }
+  }
+  else if(move.flag == CASTLING){
+    if(move.to == 62){ // white king side
+      board[63] = ROOK ;
+      board[61] = NONE ;
+    }
+    else if(move.to == 58){ // white queen side
+      board[56] = ROOK ;
+      board[59] = NONE ;
+    }
+    else if(move.to == 6){ // black king side
+      board[7] = -ROOK ;
+      board[5] = NONE ;
+    }
+    else if(move.to == 2){ // black queen side
+      board[0] = -ROOK ;
+      board[3] = NONE ;
+    }
   }
 }
 

@@ -282,3 +282,18 @@ bool MoveGen::isKingInCheck(int kingColor, const Board& board) const{
   }
   return false;
 }
+
+std::vector<Move> MoveGen::generateLegalMoves(Board& board) const{
+  std::vector<Move> pseudoMoves = generateMoves(board);
+  std::vector<Move> legalMoves;
+  int movingSide = board.getSideToMove();
+
+  for (const Move& move : pseudoMoves) {
+    board.makeMove(move);
+    if (!isKingInCheck(movingSide, board)) {
+      legalMoves.push_back(move);
+    }
+    board.unmakeMove(move);
+  }
+  return legalMoves;
+}

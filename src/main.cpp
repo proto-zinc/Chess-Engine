@@ -6,7 +6,7 @@
 
 int main(){
   Board chessBoard;
-  const std::string startingFEN = "r3k2r/8/8/8/5b2/8/8/R3K2R w KQkq - 0 1";
+  const std::string startingFEN = "8/8/4k3/8/2pP4/8/B7/4K3 b - d3 0 1";
   chessBoard.loadPositionFromFEN(startingFEN);
   chessBoard.printBoard();
 
@@ -17,9 +17,12 @@ int main(){
       std::cout << moveToString(m) << " ";
   }
   std::cout << "\n";
-  std::cout << moveGen.isKingInCheck(BLACK, chessBoard) << "\n" ;
-  std::cout << moveGen.isKingInCheck(WHITE, chessBoard) << "\n" ;
-  std::cout << moveGen.isSquareAttacked(45, WHITE, chessBoard) << "\n" ; // D7
+  std::vector<Move> legalMoves = moveGen.generateLegalMoves(chessBoard) ;
+  std::cout << "\nGenerated " << legalMoves.size() << " legal sliding moves:\n";
+  for (const Move& m : legalMoves) {
+      std::cout << moveToString(m) << " ";
+  }
+  std::cout << "\n";
 
   return 0 ;
 }
